@@ -15,31 +15,31 @@ class MainParser(ABC):
 
 class HHJobs(MainParser):
 
-    def __init__(self, city: str = "", search_field: str = "", salary: str = '', top: int = 0):
+    def __init__(self, city: str = "",
+                 search_field: str = "",
+                 salary: str = '',
+                 top: int = 0):
         self.url = 'https://api.hh.ru/vacancies'
         self.vacancies = []
-        self.params = {'text': '', 'page': 0, 'per_page': 100, "only_with_salary": True}
-
+        self.params = {'page': 0, 'per_page': 100, "only_with_salary": True}
         self.city = city
-        self.search_field = search_field
-        self.salary = salary
         self.top_vac = top
         self.salary_lower = 0
         self.salary_upper = 0
         self.salary_range = False
         self.total_vacs = 0
 
-        if self.salary.isdigit():
+        if salary.isdigit():
             self.params['salary'] = salary
 
-        if self.search_field != "":
+        if search_field != "":
             self.params['text'] = search_field
 
         if self.city != "":
             city_id = self.get_area_id(city)
             self.params['area'] = city_id
 
-        if '-' in self.salary:
+        if '-' in salary:
             self.salary_lower, self.salary_upper = list(map(int, salary.split(" - ")))
             self.salary_range = True
 
@@ -76,6 +76,14 @@ class HHJobs(MainParser):
                     tmp.append(vacancy)
             self.vacancies = tmp
 
+
+    def filter_by_keywords(self, keyword) -> None:
+
+        filtered_data = []
+
+        if isinstance(self.keywords, list):
+            pass
+
     def as_vacancy_class(self) -> list[Vacancy]:
         vac_classes_list = []
         top_stop = self.top_vac != 0
@@ -106,7 +114,7 @@ class HHJobs(MainParser):
 
 if __name__ == '__main__':
 
-    getter = HHJobs('уфа', "120000")
+    getter = HHJobs('уфа', 'python', salary="120000")
     getter.load_vacancies()
 
     # print(getter)
