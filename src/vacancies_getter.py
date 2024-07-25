@@ -1,6 +1,6 @@
 import json
 from abc import ABC, abstractmethod
-
+from threading import Thread
 import requests
 
 from config import AREAS_PATH
@@ -19,9 +19,7 @@ class HHJobs(MainParser):
     Класс для парсинга вакансий по API с сайта www.hh.ru
     """
 
-    def __init__(self, city: str = "",
-                 search_field: str = "",
-                 top: int = 0):
+    def __init__(self, city: str = "", search_field: str = "", top: int = 0):
         """
         Класс для поиска вакансий по запросу пользователя
 
@@ -30,20 +28,20 @@ class HHJobs(MainParser):
         :param top: Вывод определённого количества вакансий. По умолчанию производится вывод всех вакансий.
         """
 
-        self.url = 'https://api.hh.ru/vacancies'
-        self.vacancies = []
-        self.primary_vacancies = []
-        self.params = {'page': 0, 'per_page': 100, "only_with_salary": True}
+        self.url = "https://api.hh.ru/vacancies"
+        self.vacancies: list = []
+        self.primary_vacancies: list = []
+        self.params = {"page": 0, "per_page": 100, "only_with_salary": True}
         self.city = city
         self.top_vac = top
         self.total_vacs = 0
 
         if search_field != "":
-            self.params['text'] = search_field
+            self.params["text"] = search_field
 
         if self.city != "":
             city_id = self.get_area_id(city)
-            self.params['area'] = city_id
+            self.params["area"] = city_id
 
         self.load_vacancies()
 
@@ -58,13 +56,13 @@ class HHJobs(MainParser):
             response_data: dict = response.json()
 
             if response_data.get("items"):
-                self.vacancies.extend(response_data['items'])
+                self.vacancies.extend(response_data["items"])
 
-            if not response_data.get('pages') or self.params['page'] == response_data['pages']:
+            if not response_data.get("pages") or self.params["page"] == response_data["pages"]:
                 break
             else:
-                self.total_vacs += len(response_data['items'])
-                self.params['page'] += 1
+                self.total_vacs += len(response_data["items"])
+                self.params["page"] += 1
 
         self.primary_vacancies = self.vacancies.copy()
 
@@ -93,18 +91,18 @@ class HHJobs(MainParser):
         salary_upper = None
         salary_range = False
 
-        if '-' in salary:
+        if "-" in salary:
             salary_lower, salary_upper = list(map(int, salary.split("-")))
             salary_range = True
 
-        self.vacancies = sorted(self.vacancies, key=lambda _: _['salary']['from'] or _['salary']['to'], reverse=True)
+        self.vacancies = sorted(self.vacancies, key=lambda _: _["salary"]["from"] or _["salary"]["to"], reverse=True)
 
         if salary_range:
             filtered_data = []
 
             for vacancy in self.vacancies:
 
-                salary_target = vacancy['salary']['from'] or vacancy['salary']['to']
+                salary_target = vacancy["salary"]["from"] or vacancy["salary"]["to"]
                 if salary_lower < salary_target < salary_upper:
                     filtered_data.append(vacancy)
             self.vacancies = filtered_data
@@ -120,7 +118,7 @@ class HHJobs(MainParser):
         """
         filtered_data = []
 
-        keywords = [x.lower() for x in keywords.split(' ')]
+        keywords = [x.lower() for x in keywords.split(" ")]
 
         for vacancy in self.vacancies:
             vac_desrc = vacancy.get("snippet", {}).get("responsibility")
@@ -160,6 +158,9 @@ class HHJobs(MainParser):
         Функция возвращает сырые данные списка вакансий
         :return:
         """
+        if self.top_vac != 0 and len(self.vacancies) >= self.top_vac:
+            return self.vacancies[:self.top_vac]
+
         return self.vacancies
 
     @staticmethod
@@ -170,23 +171,12 @@ class HHJobs(MainParser):
         :return:
         """
 
-        with open(AREAS_PATH, 'r', encoding='utf8') as areas_file_data:
-            areas = json.load(areas_file_data)[0]['areas']
+        with open(AREAS_PATH, "r", encoding="utf8") as areas_file_data:
+            areas = json.load(areas_file_data)[0]["areas"]
 
         for area_data in areas:
-            for cities in area_data['areas']:
-                if city.lower() == cities['name'].lower():
-                    return cities['id']
+            for cities in area_data["areas"]:
+                if city.lower() == cities["name"].lower():
+                    return cities["id"]
         else:
             raise ValueError("Город не найден")
-
-
-if __name__ == '__main__':
-
-    all_vacs = HHJobs('уфа', 'python', top=5)
-    filtered_salary = all_vacs.filter_by_salary('50000-100000')
-    filtered_keywords = filtered_salary.filter_by_keywords('база')
-
-    for i in filtered_keywords.as_vacancy_class():
-        print(i)
-    print(f"Всего найдено {filtered_keywords.total_vacs} Вакансий")

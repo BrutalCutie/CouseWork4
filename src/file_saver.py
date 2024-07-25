@@ -9,12 +9,12 @@ from config import DATA_PATH
 class FileSaver(ABC):
 
     @abstractmethod
-    def save_result(self, *args, **kwargs):
+    def save_result(self, *args: tuple, **kwargs: dict):
         pass
 
 
 class JsonSaver(FileSaver):
-    def save_result(self, file_name: str, data: list[dict], method: Literal['w', 'a'] = 'w', encoding='utf8'):
+    def save_result(self, file_name: str, data: list[dict], method: Literal["w", "a"] = "w", encoding="utf8"):
         """
         Функция для созданения файла формата json в папке data с указанным в file_name названием
         :param file_name: Название файла
