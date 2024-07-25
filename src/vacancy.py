@@ -2,6 +2,9 @@ import json
 
 
 class Vacancy:
+    """
+    Класс вакансии
+    """
 
     def __init__(self, vacancy_data: dict):
         self.vacancy_data = vacancy_data
@@ -75,33 +78,3 @@ class Vacancy:
                     text += ' '
             return text[::-1]
         return value
-
-
-if __name__ == '__main__':
-
-    # with open('../data/vacancies.json', 'r', encoding='utf8') as vacancies:
-    #     vac_data = json.load(vacancies)['items']
-    #
-    # vacs = []
-    #
-    # for index, i in enumerate(vac_data):
-    #
-    #     vacs.append(Vacancy(i))
-    #
-    #
-    # for i in vacs:
-    #     print(i)
-    vac1 = Vacancy({
-        'salary': {
-            'from': 10000
-        }
-    })
-
-    vac2 = Vacancy({
-        'salary': {
-            'from': 10000
-        }
-    })
-
-    print(vac2 == vac1)
-

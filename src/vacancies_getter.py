@@ -1,5 +1,6 @@
 import json
 from abc import ABC, abstractmethod
+
 import requests
 
 from config import AREAS_PATH
@@ -14,23 +15,28 @@ class MainParser(ABC):
 
 
 class HHJobs(MainParser):
+    """
+    Класс для парсинга вакансий по API с сайта www.hh.ru
+    """
 
     def __init__(self, city: str = "",
                  search_field: str = "",
-                 salary: str = '',
                  top: int = 0):
+        """
+        Класс для поиска вакансий по запросу пользователя
+
+        :param city: Город поиска. По умолчанию пуст. Это означает, что поиск будет производиться по всем городам.
+        :param search_field: Поле для поиска.
+        :param top: Вывод определённого количества вакансий. По умолчанию производится вывод всех вакансий.
+        """
+
         self.url = 'https://api.hh.ru/vacancies'
         self.vacancies = []
+        self.primary_vacancies = []
         self.params = {'page': 0, 'per_page': 100, "only_with_salary": True}
         self.city = city
         self.top_vac = top
-        self.salary_lower = 0
-        self.salary_upper = 0
-        self.salary_range = False
         self.total_vacs = 0
-
-        if salary.isdigit():
-            self.params['salary'] = salary
 
         if search_field != "":
             self.params['text'] = search_field
@@ -39,13 +45,13 @@ class HHJobs(MainParser):
             city_id = self.get_area_id(city)
             self.params['area'] = city_id
 
-        if '-' in salary:
-            self.salary_lower, self.salary_upper = list(map(int, salary.split(" - ")))
-            self.salary_range = True
+        self.load_vacancies()
 
-            self.params['salary'] = self.salary_lower
-
-    def load_vacancies(self) -> None:
+    def load_vacancies(self) -> list[dict]:
+        """
+        Функция производит загрузку всех вакансий, соответвующих данным при инициализации
+        :return: список словарей с вакансиями
+        """
         while True:
 
             response = requests.get(self.url, params=self.params)
@@ -60,31 +66,84 @@ class HHJobs(MainParser):
                 self.total_vacs += len(response_data['items'])
                 self.params['page'] += 1
 
-        self.filter_by_salary()
+        self.primary_vacancies = self.vacancies.copy()
 
-    def filter_by_salary(self) -> None:
+        return self.vacancies
+
+    def reset_to_primary(self) -> None:
+        """
+        Содержание списка может быть измененр в ходе фильтраций
+        по зарплате, ключевым словам и часть вакансий может быть потеряна.
+        Эта функция сбрасывает вакансии к изначальному виду.
+        :return:
+        """
+
+        self.vacancies = self.primary_vacancies
+        self.total_vacs = len(self.vacancies)
+
+    def filter_by_salary(self, salary: str):
+        """
+        Функция производит фильтрацию по списку вакансий по зарплате. Можно указать диапазон или же одиночное число.
+        В случае если будет указано одиночное число - будут отсечены результаты с зарплатой ниже указанной
+        :param salary: желаемая минимальная зарплата или диапозон зарплаты через "-"
+        :return:
+        """
+
+        salary_lower = None
+        salary_upper = None
+        salary_range = False
+
+        if '-' in salary:
+            salary_lower, salary_upper = list(map(int, salary.split("-")))
+            salary_range = True
 
         self.vacancies = sorted(self.vacancies, key=lambda _: _['salary']['from'] or _['salary']['to'], reverse=True)
 
-        if self.salary_range:
-            tmp = []
+        if salary_range:
+            filtered_data = []
 
             for vacancy in self.vacancies:
 
                 salary_target = vacancy['salary']['from'] or vacancy['salary']['to']
-                if self.salary_lower < salary_target < self.salary_upper:
-                    tmp.append(vacancy)
-            self.vacancies = tmp
+                if salary_lower < salary_target < salary_upper:
+                    filtered_data.append(vacancy)
+            self.vacancies = filtered_data
+            self.total_vacs = len(self.vacancies)
 
+        return self
 
-    def filter_by_keywords(self, keyword) -> None:
-
+    def filter_by_keywords(self, keywords: str):
+        """
+        Функция фильтрует по ключевым словам в списке вакансий и отсекает вакансии где нет совпадений
+        :param keywords: Ключевые слова. Слова разделяются через пробел.
+        :return:
+        """
         filtered_data = []
 
-        if isinstance(self.keywords, list):
-            pass
+        keywords = [x.lower() for x in keywords.split(' ')]
+
+        for vacancy in self.vacancies:
+            vac_desrc = vacancy.get("snippet", {}).get("responsibility")
+
+            if not vac_desrc:
+                continue
+
+            for kw in keywords:
+
+                if kw in vac_desrc:
+                    filtered_data.append(vacancy)
+                    break
+
+        self.vacancies = filtered_data
+        self.total_vacs = len(self.vacancies)
+
+        return self
 
     def as_vacancy_class(self) -> list[Vacancy]:
+        """
+        Функция возвращает список с экземплярами класса вакансий(Vacancy).
+        :return:
+        """
         vac_classes_list = []
         top_stop = self.top_vac != 0
 
@@ -96,10 +155,20 @@ class HHJobs(MainParser):
 
         return vac_classes_list
 
-    def get_raw_data(self) -> list[dict]: return self.vacancies
+    def get_raw_data(self) -> list[dict]:
+        """
+        Функция возвращает сырые данные списка вакансий
+        :return:
+        """
+        return self.vacancies
 
     @staticmethod
     def get_area_id(city: str) -> int | None:
+        """
+        Функция трансформирует город в id города, для работы для поиска вакансий по городу.
+        :param city: Город
+        :return:
+        """
 
         with open(AREAS_PATH, 'r', encoding='utf8') as areas_file_data:
             areas = json.load(areas_file_data)[0]['areas']
@@ -114,10 +183,10 @@ class HHJobs(MainParser):
 
 if __name__ == '__main__':
 
-    getter = HHJobs('уфа', 'python', salary="120000")
-    getter.load_vacancies()
+    all_vacs = HHJobs('уфа', 'python', top=5)
+    filtered_salary = all_vacs.filter_by_salary('50000-100000')
+    filtered_keywords = filtered_salary.filter_by_keywords('база')
 
-    # print(getter)
-    for i in getter.as_vacancy_class():
+    for i in filtered_keywords.as_vacancy_class():
         print(i)
-    print(f"Всего найдено {getter.total_vacs} Вакансий")
+    print(f"Всего найдено {filtered_keywords.total_vacs} Вакансий")
