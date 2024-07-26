@@ -180,3 +180,12 @@ class HHJobs(MainParser):
                     return cities["id"]
         else:
             raise ValueError("Город не найден")
+
+
+if __name__ == '__main__':
+    all_vac = HHJobs('уфа', 'python', 5)
+    all_vac = all_vac.filter_by_salary('10000')
+
+    one = all_vac.as_vacancy_class()[0].__class__
+    print(one)
+    print(Vacancy)
