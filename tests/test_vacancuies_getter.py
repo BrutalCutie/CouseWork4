@@ -1,6 +1,5 @@
-from src.vacancies_getter import HHJobs, MainParser
+from src.vacancies_getter import HHJobs
 from unittest.mock import patch
-import pytest
 
 from src.vacancy import Vacancy
 
