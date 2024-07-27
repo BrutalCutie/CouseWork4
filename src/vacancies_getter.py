@@ -1,6 +1,5 @@
 import json
 from abc import ABC, abstractmethod
-from threading import Thread
 import requests
 
 from config import AREAS_PATH
