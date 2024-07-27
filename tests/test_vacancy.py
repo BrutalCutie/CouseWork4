@@ -10,21 +10,9 @@ def test_vacancy_without_city(capsys):
         "department": None,
         "has_test": False,
         "response_letter_required": False,
-        "area": {
-            "id": "99",
-            "name": "Уфа",
-            "url": "https://api.hh.ru/areas/99"
-        },
-        "salary": {
-            "from": 300000,
-            "to": None,
-            "currency": "RUR",
-            "gross": True
-        },
-        "type": {
-            "id": "open",
-            "name": "Открытая"
-        },
+        "area": {"id": "99", "name": "Уфа", "url": "https://api.hh.ru/areas/99"},
+        "salary": {"from": 300000, "to": None, "currency": "RUR", "gross": True},
+        "type": {"id": "open", "name": "Открытая"},
         "address": None,
         "response_url": None,
         "sort_point_distance": None,
@@ -45,48 +33,33 @@ def test_vacancy_without_city(capsys):
             "logo_urls": {
                 "240": "https://img.hhcdn.ru/employer-logo/6601822.jpeg",
                 "90": "https://img.hhcdn.ru/employer-logo/6601821.jpeg",
-                "original": "https://img.hhcdn.ru/employer-logo-original/1245348.jpg"
+                "original": "https://img.hhcdn.ru/employer-logo-original/1245348.jpg",
             },
             "vacancies_url": "https://api.hh.ru/vacancies?employer_id=10384591",
             "accredited_it_employer": True,
-            "trusted": True
+            "trusted": True,
         },
-        "snippet": {
-            "requirement": None,
-            "responsibility": None
-        },
+        "snippet": {"requirement": None, "responsibility": None},
         "contacts": None,
-        "schedule": {
-            "id": "fullDay",
-            "name": "Полный день"
-        },
+        "schedule": {"id": "fullDay", "name": "Полный день"},
         "working_days": [],
         "working_time_intervals": [],
         "working_time_modes": [],
         "accept_temporary": False,
-        "professional_roles": [
-            {
-                "id": "96",
-                "name": "Программист, разработчик"
-            }
-        ],
+        "professional_roles": [{"id": "96", "name": "Программист, разработчик"}],
         "accept_incomplete_resumes": False,
-        "experience": {
-            "id": "between1And3",
-            "name": "От 1 года до 3 лет"
-        },
-        "employment": {
-            "id": "full",
-            "name": "Полная занятость"
-        },
+        "experience": {"id": "between1And3", "name": "От 1 года до 3 лет"},
+        "employment": {"id": "full", "name": "Полная занятость"},
         "adv_response_url": None,
         "is_adv_vacancy": False,
-        "adv_context": None
+        "adv_context": None,
     }
     print(Vacancy(vacancy_data=vac_data))
     captured = capsys.readouterr()
 
-    assert captured.out == """
+    assert (
+        captured.out
+        == """
 ============================================= Вакансия =============================================
 Название вакансии: Разработчик С++
 Требование к вакансии: None
@@ -98,7 +71,10 @@ def test_vacancy_without_city(capsys):
 Ссылка на вакансию: https://hh.ru/vacancy/98707107
 ========================================== Конец вакансии ==========================================
 
-"""[1:]
+"""[
+            1:
+        ]
+    )
 
 
 def test_vacancy_with_city(capsys):
@@ -109,24 +85,10 @@ def test_vacancy_with_city(capsys):
         "department": None,
         "has_test": False,
         "response_letter_required": False,
-        "area": {
-            "id": "99",
-            "name": "Уфа",
-            "url": "https://api.hh.ru/areas/99"
-        },
-        "salary": {
-            "from": 300000,
-            "to": None,
-            "currency": "RUR",
-            "gross": True
-        },
-        "type": {
-            "id": "open",
-            "name": "Открытая"
-        },
-        "address": {
-            "raw": "Уфа, улица Джалиля Киекбаева, 2"
-        },
+        "area": {"id": "99", "name": "Уфа", "url": "https://api.hh.ru/areas/99"},
+        "salary": {"from": 300000, "to": None, "currency": "RUR", "gross": True},
+        "type": {"id": "open", "name": "Открытая"},
+        "address": {"raw": "Уфа, улица Джалиля Киекбаева, 2"},
         "response_url": None,
         "sort_point_distance": None,
         "published_at": "2024-05-11T17:53:15+0300",
@@ -146,48 +108,33 @@ def test_vacancy_with_city(capsys):
             "logo_urls": {
                 "240": "https://img.hhcdn.ru/employer-logo/6601822.jpeg",
                 "90": "https://img.hhcdn.ru/employer-logo/6601821.jpeg",
-                "original": "https://img.hhcdn.ru/employer-logo-original/1245348.jpg"
+                "original": "https://img.hhcdn.ru/employer-logo-original/1245348.jpg",
             },
             "vacancies_url": "https://api.hh.ru/vacancies?employer_id=10384591",
             "accredited_it_employer": True,
-            "trusted": True
+            "trusted": True,
         },
-        "snippet": {
-            "requirement": None,
-            "responsibility": None
-        },
+        "snippet": {"requirement": None, "responsibility": None},
         "contacts": None,
-        "schedule": {
-            "id": "fullDay",
-            "name": "Полный день"
-        },
+        "schedule": {"id": "fullDay", "name": "Полный день"},
         "working_days": [],
         "working_time_intervals": [],
         "working_time_modes": [],
         "accept_temporary": False,
-        "professional_roles": [
-            {
-                "id": "96",
-                "name": "Программист, разработчик"
-            }
-        ],
+        "professional_roles": [{"id": "96", "name": "Программист, разработчик"}],
         "accept_incomplete_resumes": False,
-        "experience": {
-            "id": "between1And3",
-            "name": "От 1 года до 3 лет"
-        },
-        "employment": {
-            "id": "full",
-            "name": "Полная занятость"
-        },
+        "experience": {"id": "between1And3", "name": "От 1 года до 3 лет"},
+        "employment": {"id": "full", "name": "Полная занятость"},
         "adv_response_url": None,
         "is_adv_vacancy": False,
-        "adv_context": None
+        "adv_context": None,
     }
     print(Vacancy(vacancy_data=vac_data))
     captured = capsys.readouterr()
 
-    assert captured.out == """
+    assert (
+        captured.out
+        == """
 ============================================= Вакансия =============================================
 Название вакансии: Разработчик С++
 Требование к вакансии: None
@@ -199,7 +146,10 @@ def test_vacancy_with_city(capsys):
 Ссылка на вакансию: https://hh.ru/vacancy/98707107
 ========================================== Конец вакансии ==========================================
 
-"""[1:]
+"""[
+            1:
+        ]
+    )
 
 
 def test_vacancy_equal(vac1, vac1_2):
@@ -217,4 +167,3 @@ def test_vacancy_gt(vac1, vac2):
 
 def test_vacancy_ge(vac1, vac1_2):
     assert vac1 <= vac1_2
-

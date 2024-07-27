@@ -19,20 +19,18 @@ def main() -> None:
     top_n = input("Введите количество выводимых вакансий (оставьте пустым, чтобы вывести все): ")
     city_search = input("Введите город/село/деревню для поиска вакансий (оставьте пустым, чтобы искать по всем): ")
     salary = input("Введите минимальную зарлату или диапазон зарплаты (Nmin-Nmax): ")
-    keywords = input("Введите ключевые слова для поиска (разделение слов через пробел): ")
+    keywords = input("Введите ключевые слова для поиска (разделение слов через пробел. Можно оставить пустым): ")
 
-    params = {
-        "city": city_search,
-        "search_field": search_field,
-        "top": int(top_n) if top_n != '' else 0
-    }
+    params = {"city": city_search, "search_field": search_field, "top": int(top_n) if top_n != "" else 0}
 
+    print("\rИдёт поиск вакансий", end="")
     vacancies = HHJobs(**params)
 
     if keywords != "":
         vacancies = vacancies.filter_by_keywords(keywords.lower())
 
-    vacancies = vacancies.filter_by_salary(salary)
+    if salary != "":
+        vacancies = vacancies.filter_by_salary(salary)
 
     print("Вот вакансии по вашему запросу:\n")
 
@@ -48,8 +46,8 @@ def main() -> None:
         file_name = input("Напишите название файла, в который будут сохранены результаты: ")
         JsonSaver().save_result(file_name, vacancies.get_raw_data())
 
-        print('Файл с вакансиями успешно создан')
+        print("Файл с вакансиями успешно создан")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

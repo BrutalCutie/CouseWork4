@@ -96,16 +96,20 @@ class HHJobs(MainParser):
 
         self.vacancies = sorted(self.vacancies, key=lambda _: _["salary"]["from"] or _["salary"]["to"], reverse=True)
 
-        if salary_range:
-            filtered_data = []
+        filtered_data = []
 
-            for vacancy in self.vacancies:
-
-                salary_target = vacancy["salary"]["from"] or vacancy["salary"]["to"]
-                if salary_lower < salary_target < salary_upper:
+        for vacancy in self.vacancies:
+            salary_target = vacancy["salary"]["from"] or vacancy["salary"]["to"]
+            if salary_range:
+                if salary_lower <= salary_target <= salary_upper:
                     filtered_data.append(vacancy)
-            self.vacancies = filtered_data
-            self.total_vacs = len(self.vacancies)
+                    continue
+
+            if salary_target >= int(salary):
+                filtered_data.append(vacancy)
+
+        self.vacancies = filtered_data
+        self.total_vacs = len(self.vacancies)
 
         return self
 
@@ -158,7 +162,7 @@ class HHJobs(MainParser):
         :return:
         """
         if self.top_vac != 0 and len(self.vacancies) >= self.top_vac:
-            return self.vacancies[:self.top_vac]
+            return self.vacancies[: self.top_vac]
 
         return self.vacancies
 
@@ -179,3 +183,9 @@ class HHJobs(MainParser):
                     return cities["id"]
         else:
             raise ValueError("Город не найден")
+
+
+if __name__ == "__main__":
+    all_vacs = HHJobs("уфа", "python", 5)
+
+    filtered_salary = all_vacs.filter_by_salary("50000")
